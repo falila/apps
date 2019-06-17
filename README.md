@@ -6,6 +6,7 @@ This current project aims to develop some apps like voting app, timer app, tiket
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
+``` 
 git clone git@gitlab.com:falila/falisoftsolutions.git
 
 cd falisoftsolutions/
@@ -13,6 +14,8 @@ cd falisoftsolutions/
 python manage.py collectstatic
 
 python manage.py runserver
+
+```
 
 ### Docker Contenair
 
@@ -46,13 +49,14 @@ pipenv install
 [AWS] https://falisoftapps.com/apps)
 
 ## Running the tests
-
+```
 python manage.py test
+
+```
 
 
 ## Deployment
-
- 
+ coming soon
 
 ## Built With
 
