@@ -21,24 +21,24 @@ python manage.py runserver
 
 ``` 
 1. Bring up the docker stack:
-```docker-compose up -d```
+   docker-compose up -d
 
 2. Rest API is available on http://localhost:8000
 
 3. Trigger timeseries request:
-```curl -d '{"database_code":"WIKI", "dataset_code":"FB"}' -H "Content-Type: application/json" -X POST http://localhost:8000```
+   curl -d '{"database_code":"WIKI", "dataset_code":"FB"}' -H "Content-Type: application/json" -X POST http://localhost:8000
 
 4. Check logs:
-```docker-compose logs -f```
+   docker-compose logs -f
 
 5. List cached timeseries:
-```curl -X GET http://localhost:8000```
+   curl -X GET http://localhost:8000
 
 6. Get timeseries:
-```curl -X GET http://localhost:8000/WIKI-FB```
+   curl -X GET http://localhost:8000/WIKI-FB
 
 6. Monitor tasks in flower:
-[http://localhost:5555](http://localhost:5555)
+   [http://localhost:5555](http://localhost:5555)
 ```
 
 ### Prerequisites
