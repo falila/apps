@@ -20,11 +20,25 @@ python manage.py runserver
 ### Docker Contenair
 
 ``` 
-docker-compose build
+1. Bring up the docker stack:
+```docker-compose up -d```
 
-docker-compose down --remove-orphans
+2. Rest API is available on http://localhost:8000
 
-docker-compose up -d 
+3. Trigger timeseries request:
+```curl -d '{"database_code":"WIKI", "dataset_code":"FB"}' -H "Content-Type: application/json" -X POST http://localhost:8000```
+
+4. Check logs:
+```docker-compose logs -f```
+
+5. List cached timeseries:
+```curl -X GET http://localhost:8000```
+
+6. Get timeseries:
+```curl -X GET http://localhost:8000/WIKI-FB```
+
+6. Monitor tasks in flower:
+[http://localhost:5555](http://localhost:5555)
 ```
 
 ### Prerequisites
