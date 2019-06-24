@@ -20,6 +20,7 @@ python manage.py runserver
 ### Docker Contenair
 
 ``` 
+
 1. Bring up the docker stack:
    docker-compose up -d
 
@@ -39,6 +40,7 @@ python manage.py runserver
 
 6. Monitor tasks in flower:
    [http://localhost:5555](http://localhost:5555)
+   
 ```
 
 ### Prerequisites
@@ -63,11 +65,11 @@ pipenv install
 [AWS] https://falistore.com)
 
 ## Running the tests
+
 ```
 python manage.py test
 
 ```
-
 
 ## Deployment
  coming soon
@@ -75,7 +77,7 @@ python manage.py test
 ## Built With
 
 * [Docker ](https://docker.com/) - Docker container
-* [AWS](https://falisolfapps.com/apps) - Devops
+* [AWS](https://falistore.com/) - Devops
 
 ## Contributing
 
