@@ -60,7 +60,7 @@ pipenv install
 
 ## Demo 
 
-[AWS] https://falisoftapps.com/apps)
+[AWS] https://falistore.com)
 
 ## Running the tests
 ```
