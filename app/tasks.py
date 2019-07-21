@@ -2,7 +2,7 @@ import os
 import logging
 import requests
 
-from .worker import app
+from app.worker import app
 from django.conf import settings
 
 

@@ -4,8 +4,8 @@ import environ
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ROOT_DIR = Path(BASE_DIR,'..').resolve()
-ENV_FILE = str(Path(ROOT_DIR,'env.env').resolve())
+ROOT_DIR = Path(BASE_DIR, '..').resolve()
+ENV_FILE = str(Path(ROOT_DIR, 'env.env').resolve())
 
 env = environ.Env()
 if Path(ENV_FILE).is_file():
@@ -13,18 +13,16 @@ if Path(ENV_FILE).is_file():
 
 ENVIRONMENT = env('ENV', default='development')
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ')myo10vwg%@b1+xf11z6#x-66mpi^9k!ilwry8v^4-8so$3d8s'
+SECRET_KEY = ')myo10vwg%@b1+xf11z6#x-66mpi^9k!ilwry8v^4-8so$3d8ssdfsdfd'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-
 
 # Application definition
 
@@ -36,6 +34,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'main',
+    'restaurant',
+    'order',
 ]
 
 MIDDLEWARE = [
@@ -48,7 +49,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'api.urls'
+ROOT_URLCONF = 'app.urls'
 
 TEMPLATES = [
     {
@@ -66,27 +67,27 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'api.wsgi.application'
-
+WSGI_APPLICATION = 'app.wsgi.application'
 
 CELERY = {
-    'BROKER_URL': env('CELERY_BROKER'),
-    'CELERY_IMPORTS': ('worker.tasks', ),
+    'BROKER_URL': env('CELERY_BROKER', default='amqp://user:password@broker:5672'),
+    'CELERY_IMPORTS': ('tasks',),
     'CELERY_TASK_SERIALIZER': 'json',
     'CELERY_RESULT_SERIALIZER': 'json',
     'CELERY_ACCEPT_CONTENT': ['json'],
 }
 
-
 DATA_PATH = '/app/data'
-
 
 # Database
 # https://docs.djangoproject.com/en/2.0/ref/settings/#databases
 
 DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.0/ref/settings/#auth-password-validators
@@ -106,7 +107,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.0/topics/i18n/
 
@@ -119,7 +119,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
