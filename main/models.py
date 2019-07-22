@@ -20,4 +20,5 @@ class Driver(models.Model):
     address = models.CharField(max_length=500, blank=True)
     location = models.CharField(max_length=150, blank=True)
     fip = models.CharField(max_length=10)
-
+    lon = models.FloatField(blank=True, default=0)
+    lat = models.FloatField(blank=True, default=0)

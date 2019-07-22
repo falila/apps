@@ -4,14 +4,17 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+django_factory_boy = "*"
 
 [packages]
-celery = "==4.2.0"
-djangorestframework = "==3.8.2"
-requests = "==2.19.1"
-Django = "==2.2.2"
+celery = "==4.3.0"
+djangorestframework = "==3.10.1"
+requests = "==2.22.0"
+Django = "==2.2.3"
 django-environ = "*"
 Pillow = "*"
+django-filter = "==2.2.0"
+django-factory-boy = "*"
 
 [requires]
 python_version = "3.6"
