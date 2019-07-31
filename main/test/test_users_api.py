@@ -5,6 +5,7 @@ from rest_framework.test import APITestCase
 from rest_framework.authtoken.models import Token
 
 from main.factories import DriverFactory, CustomerFactory
+from oauth2_provider.models import AccessToken
 
 
 class AccountsTest(APITestCase):
@@ -149,5 +150,17 @@ class AccountsTest(APITestCase):
 
         response = self.client.post(self.create_url, data, format='json')
         user = User.objects.latest('id')
+        # acces_token = AccessToken.objects.get(user=user)
         token = Token.objects.get(user=user)
         self.assertEqual(response.data['token'], token.key)
+
+    def test_get_token(self):
+        """
+        Ensure we can create a new user and a valid token is created with it.
+        """
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword'
+        }
+        response = self.client.post(reverse('login'), data, format='json')
+        self.assertIsNotNone(response.data['token'])
