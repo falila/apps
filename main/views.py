@@ -4,13 +4,14 @@ from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from oauth2_provider.contrib.rest_framework import IsAuthenticatedOrTokenHasScope
 from oauth2_provider.models import AccessToken
 from rest_framework import permissions, status, viewsets, mixins
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -90,11 +91,18 @@ class DriverViewSet(viewsets.GenericViewSet,
                     mixins.CreateModelMixin):
     """Manage tags in the database"""
     # authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['name', 'phone', 'fip', 'user']
+
+    def get_permissions(self):
+
+        if self.action == 'destroy':
+            permission_classes = [IsAdminUser]
+        else:
+            permission_classes = [IsAuthenticated, IsAuthenticatedOrTokenHasScope]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         """Return objects for the current authenticated user only"""
@@ -102,7 +110,7 @@ class DriverViewSet(viewsets.GenericViewSet,
 
     # POST params: access_token, order_id
     @action(detail=False, methods=['post'])
-    def driver_pick_orders(request):
+    def driver_pick_orders(self, request):
         if request.method == "POST":
             # Get token
             if request.user:
@@ -110,7 +118,8 @@ class DriverViewSet(viewsets.GenericViewSet,
 
             # Check if the driver can only pick up one order at the same timezone
             if Order.objects.filter(driver=driver).exclude(status=Order.ONTHEWAY):
-                return JsonResponse({"status": "failed", "error": "You can only pick up one order at a time."})
+                return JsonResponse({"status": "failed", "error": "You can only pick up one order at a time."},
+                                    status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 order = Order.objects.get(
@@ -137,9 +146,8 @@ class DriverViewSet(viewsets.GenericViewSet,
                 driver = request.user.driver
                 if not driver:
                     raise Exception
-
                 order = OrderSerializer(
-                    Order.objects.get.filter(driver=driver).order_by("picked_at").last()
+                    Order.objects.filter(driver=driver).order_by("picked_at").last()
                 ).data
             except Exception as e:
                 return JsonResponse({"status": "failed", "error": "No driver found."},
@@ -158,10 +166,13 @@ class DriverViewSet(viewsets.GenericViewSet,
             except Exception as e:
                 return JsonResponse({"status": "failed", "error": "No driver found."},
                                     status=status.HTTP_400_BAD_REQUEST)
-
-        order = Order.objects.get(id=request.POST["order_id"], driver=driver)
-        order.status = order.DELIVERED
-        order.save()
+        try:
+            order = Order.objects.get(id=request.POST["order_id"], driver=driver)
+            order.status = order.DELIVERED
+            order.save()
+        except Order.DoesNotExist :
+            return JsonResponse({"status": "failed", "error": "No order found."},
+                                status=status.HTTP_400_BAD_REQUEST)
 
         return JsonResponse({"status": "success"})
 

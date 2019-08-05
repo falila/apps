@@ -11,7 +11,7 @@ class Restaurant(models.Model):
     address = models.CharField(max_length=500, blank=True)
     logo = models.ImageField(upload_to='restaurant_logo/', default='restaurant_logo/pie.jpeg',null=True)
     fip = models.CharField(max_length=10, blank=True)  # field identification point
-    account_ref = models.UUIDField(default=uuid.uuid4, editable=False)
+    account_ref = models.UUIDField(default=uuid.uuid4, editable=True, blank=True)
 
     def __str__(self):
         return self.name

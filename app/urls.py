@@ -42,5 +42,5 @@ urlpatterns = [
     url(r'^api/v1/restaurants/order/$', views_restau.restaurant_order, name='restaurant-order'),
     url(r'^api/v1/restaurants/customer/(?P<restaurant_id>\d+)/$', views_restau.restaurant_customer,
     name='restaurant-customer'),
-    url(r'^api/v1/', include((router.urls, 'api'))),
+    url(r'^api/v1/', include((router.urls, 'api'),namespace="api")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

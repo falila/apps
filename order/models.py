@@ -5,6 +5,7 @@ from main.models import Customer, Driver
 
 
 class Order(models.Model):
+    PLACED = 0
     COOKING = 1
     READY = 2
     ONTHEWAY = 3
@@ -22,7 +23,7 @@ class Order(models.Model):
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE, blank=True, null=True)
     address = models.CharField(max_length=500)
     total = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
-    status = models.IntegerField(choices=STATUS_CHOICES)
+    status = models.IntegerField(choices=STATUS_CHOICES, default=PLACED)
     created_at = models.DateTimeField(default=timezone.now)
     picked_at = models.DateTimeField(blank=True, null=True)
 

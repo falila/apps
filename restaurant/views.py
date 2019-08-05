@@ -1,10 +1,7 @@
-from datetime import timedelta
-
 from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django_filters.rest_framework import DjangoFilterBackend
 from oauth2_provider.models import AccessToken
 from rest_framework import mixins
@@ -88,8 +85,6 @@ def logout(self, request):
     access_token = AccessToken.objects.get(token=request.POST.get("access_token"),
                                            expires__gt=timezone.now()).delete()
     logout(request)
-
-
 
 
 class MealViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
