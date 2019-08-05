@@ -52,6 +52,7 @@ class DriverTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_driver_get_latest_orders(self):
+        """ Getting the latest order."""
         order = Order.objects.create(customer=self.test_customer, restaurant=self.test_resto,
                                      address="78 bvd lakeshore", status=Order.DELIVERED)
 

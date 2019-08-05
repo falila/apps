@@ -2,8 +2,10 @@ from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
+from rest_framework.utils import json
 
-from restaurant.models import Restaurant
+from main.factories import OrderFactory, MealFactory
+from restaurant.models import Restaurant, Meal
 
 
 class RestaurantTest(APITestCase):
@@ -27,62 +29,50 @@ class RestaurantTest(APITestCase):
         }
         # create a new restaurant
         self.test_user = User.objects.filter(username='testuser').first()
-        self.restaurant_test = Restaurant.objects.create(**restaurant_data, user=self.test_user)
+        self.test_restaurant = Restaurant.objects.create(**restaurant_data)
+        self.test_restaurant.user = self.test_user
+        self.test_restaurant.save()
 
-        data = {
+        data_login = {
             'username': 'testuser',
             'password': 'testpassword'
         }
-        response = self.client.post(reverse('login'), data, format='json')
+        response = self.client.post(reverse('login'), data_login, format='json')
         access_token = response.data['token']
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + access_token)
-        # self.client.login(username=self.test_user.username, password='testpassword')
-
-    def test_restaurant_home(self):
-        """
-                Go to restaurant home page.
-        """
-        self.assertEqual(Restaurant.objects.count(), 1)
-        self.restaurant_home_url = reverse('restaurant-home')
-
-        response = self.client.get(self.restaurant_home_url)
-        self.assertEqual(response.status_code, status.HTTP_302_FOUND)
-
-    def test_restaurant_account(self):
-        """
-                Can acces to a restaurant account info.
-        """
-        self.assertEqual(Restaurant.objects.count(), 1)
-        self.restaurant_account_url = reverse('restaurant-account')
-
-        response = self.client.get(self.restaurant_account_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # self.assertContains(response.data, "foobar")
-        print(response.data)
-
-    def test_restaurant_acces_home(self):
-        """
-                try to  acces to a restaurant account info.
-        """
-        # self.client.logout()
-        self.assertEqual(Restaurant.objects.count(), 1)
-        self.restaurant_account_url = reverse('restaurant-account')
-
-        response = self.client.get(self.restaurant_account_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_restaurant_add_meal(self):
         """
              add meal
         """
-        self.add_meal = reverse('meal:meal-list')
+        self.add_meal = reverse('api:meal-list')
 
         data = {
             "name": "meal",
             "short_description": " pizza",
             "price": "7.52",
-            "restaurant_id": self.restaurant_test.id
         }
 
         response = self.client.post(self.add_meal, data=data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        meal = Meal.objects.filter(name='meal').first()
+        self.assertIsNotNone(meal)
+
+        response = self.client.get(reverse('api:meal-list'))
+        self.assertTrue(len(response.content) > 10)
+
+    def test_restaurant_get_meal_by_restaurant(self):
+        for cpt in range(10):
+            OrderFactory()
+            MealFactory()
+        count = Meal.objects.all().count()
+        response = self.client.get(reverse('api:meal-list'))
+        self.assertEqual(len(json.loads(response.content)), count)
+
+        for meal in Meal.objects.all():
+            meal.restaurant = self.test_restaurant
+            meal.save()
+
+        response = self.client.get(reverse('api:meal-list'), data={"restaurant": self.test_restaurant.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)

@@ -12,6 +12,7 @@ class Order(models.Model):
     DELIVERED = 4
 
     STATUS_CHOICES = (
+        (PLACED, "Placed"),
         (COOKING, "Cooking"),
         (READY, "Ready"),
         (ONTHEWAY, "On the way"),
