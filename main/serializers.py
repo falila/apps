@@ -7,24 +7,66 @@ from order.models import Order, OrderDetails
 from restaurant.models import Restaurant, Meal
 from .models import Customer, Driver, Tag
 
+UserModel = get_user_model()
 
-class RestaurantSerializer(serializers.ModelSerializer):
-    # logo = serializers.SerializerMethodField(allow_null=True)
+
+class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
     name = serializers.CharField(allow_blank=True, allow_null=True)
     phone = serializers.CharField(allow_blank=True, allow_null=True)
     address = serializers.CharField(allow_blank=True, allow_null=True)
-    fip = serializers.CharField(allow_blank=True, allow_null=True)
+    fip = serializers.CharField(allow_blank=True, allow_null=True, read_only=True)
     account_ref = serializers.CharField(allow_blank=True, allow_null=True, read_only=True)
+    bio = serializers.CharField(max_length=500, allow_blank=True)
+    avatar = serializers.ImageField(allow_null=True)
+    birth_date = serializers.DateField(allow_null=True)
+    type = serializers.IntegerField(allow_null=True)
+    rank = serializers.IntegerField(default=0, allow_null=True, read_only=True)
 
-    def get_logo(self, restaurant):
+    def get_logo(self, profile):
         request = self.context.get('request')
-        logo_url = restaurant.logo_url
+        logo_url = profile.avatar_url
         return request.build_absolute_uri(logo_url)
 
     class Meta:
         model = Restaurant
-        fields = ("id", "name", "phone", "address", "fip", "user", "account_ref", "logo")
+        fields = (
+        "id", "name", "phone", "address", "fip", "account_ref", "bio", "avatar", "birth_date", "rank", "type", 'user')
+
+
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+    email = serializers.EmailField(required=True, max_length=100,
+                                   validators=[UniqueValidator(queryset=User.objects.all())])
+
+    username = serializers.CharField(max_length=32, required=True,
+                                     validators=[UniqueValidator(queryset=User.objects.all())]
+                                     )
+    profile = ProfileSerializer(source='Profile', required=False)
+
+    def create(self, validated_data):
+        user = UserModel.objects.create(
+            username=validated_data['username'],
+            email=validated_data['email']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+
+        return user
+
+    class Meta:
+        model = UserModel
+        # Tuple of serialized model fields
+        fields = ("id", "username", "password", "email", "profile")
+
+
+class RestaurantSerializer(serializers.ModelSerializer):
+    # user = serializers.PrimaryKeyRelatedField(many=False, read_only=True)
+    user = UserSerializer()
+
+    class Meta:
+        model = Restaurant
+        fields = ("id", "user")
 
 
 class MealSerializer(serializers.ModelSerializer):
@@ -41,27 +83,26 @@ class MealSerializer(serializers.ModelSerializer):
         read_only_Fields = ('id',)
 
 
-# ORDER SERIALIZER
 class CustomerSerializer(serializers.ModelSerializer):
-    name = serializers.ReadOnlyField(source="user.get_full_name")
+    user = UserSerializer()
 
     class Meta:
         model = Customer
-        fields = ("id", "name", "avatar", "phone", "address", "fip")
+        fields = ("id", "user")
 
 
 class DriverSerializer(serializers.ModelSerializer):
-    name = serializers.ReadOnlyField(source="user.get_full_name")
+    user = UserSerializer()
 
     class Meta:
         model = Driver
-        fields = ("id", "name", "avatar", "phone", "address", "location", "lon", "lat", "fip")
+        fields = ("id", "user",)
 
 
 class OrderRestaurantSerializer(serializers.ModelSerializer):
     class Meta:
         model = Restaurant
-        fields = ("id", "name", "phone", "address")
+        fields = ("id",)
 
 
 class OrderMealSerializer(serializers.ModelSerializer):
@@ -90,38 +131,10 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ("id", "customer", "restaurant", "driver", "order_details", "total", "status", "address")
 
 
-UserModel = get_user_model()
-
-
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True, min_length=8)
-    email = serializers.EmailField(required=True, max_length=100,
-                                   validators=[UniqueValidator(queryset=User.objects.all())])
-
-    username = serializers.CharField(max_length=32, required=True,
-                                     validators=[UniqueValidator(queryset=User.objects.all())]
-                                     )
-
-    def create(self, validated_data):
-        user = UserModel.objects.create(
-            username=validated_data['username'],
-            email=validated_data['email']
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-
-        return user
-
-    class Meta:
-        model = UserModel
-        # Tuple of serialized model fields
-        fields = ("id", "username", "password", "email",)
-
-
 class TagSerializer(serializers.ModelSerializer):
     """Serializer for tag object"""
 
     class Meta:
         model = Tag
-        fields = ('id', 'name')
+        fields = ('id', 'name',)
         read_only_Fields = ('id',)

@@ -18,7 +18,7 @@ class RestaurantViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
     permission_classes = [IsAuthenticated, ]
     queryset = Restaurant.objects.all()
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'fip', 'account_ref', 'phone']
+    filterset_fields = ['id']
 
     def perform_create(self, serializer):
         """Create a new meal"""

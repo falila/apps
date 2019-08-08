@@ -20,13 +20,7 @@ class RestaurantTest(APITestCase):
 
         self.client.post(self.create_url, data, format='json')
 
-        restaurant_data = {
-            'name': 'foobar',
-            'phone': 'foobarbaz@example.com',
-            'address': 'foo',
-            'logo': '',
-            'fip': 'fip124785'
-        }
+        restaurant_data = {}
         # create a new restaurant
         self.test_user = User.objects.filter(username='testuser').first()
         self.test_restaurant = Restaurant.objects.create(**restaurant_data)

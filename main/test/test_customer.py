@@ -12,7 +12,7 @@ from order.models import Order
 from restaurant.models import Restaurant
 
 
-class DriverTest(APITestCase):
+class CustomerTest(APITestCase):
     def setUp(self):
         # We want to go ahead and originally create a user.
         self.test_user = User.objects.create_user('testuser12', 'test@example12.com', 'testpassword')
@@ -37,21 +37,21 @@ class DriverTest(APITestCase):
         self.test_driver.user = self.test_user
         self.test_driver.save()
 
-    def test_get_all_driver_restricted_to_admin(self):
+    def test_get_meals(self):
         response = self.client.get(reverse("api:driver-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_get_driver_detail(self):
+    def test_create_order(self):
         response = self.client.get(reverse("api:driver-list"), data={'id': 1})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_driver_complete_orders_no_matching_order_found(self):
+    def test_get_order_location(self):
         """The driver cant complete an fake order."""
         self.test_driver.user = None
         response = self.client.post(reverse("api:driver-driver-complete-orders"), data={"order_id": 12})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_driver_get_latest_orders(self):
+    def test_last_order(self):
         """ Getting the latest order."""
         order = Order.objects.create(customer=self.test_customer, restaurant=self.test_resto,
                                      address="78 bvd lakeshore", status=Order.DELIVERED)
@@ -63,13 +63,12 @@ class DriverTest(APITestCase):
         response = self.client.get(reverse("api:driver-driver-get-latest-orders"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(len(response.content) > 1)
-        print(response.content)
 
-    def test_driver_get_latest_orders_(self):
+    def test_order_history(self):
         response = self.client.get(reverse("api:driver-driver-get-latest-orders"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_test_complete_orders_success(self):
+    def test_get_profile(self):
         self.assertIsNotNone(self.test_driver.user)
         self.test_order.driver = self.test_driver
         self.test_order.save()
@@ -77,7 +76,7 @@ class DriverTest(APITestCase):
         response = self.client.post(reverse("api:driver-driver-complete-orders"), data={"order_id": self.test_order.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_driver_picked_order_already_assignTo(self):
+    def test_rank_delivery(self):
         """ A driver can picked more than one order at the same time."""
         order = Order.objects.create(customer=self.test_customer, restaurant=self.test_resto,
                                      address="78 bvd lakeshore", status=Order.READY)
@@ -88,7 +87,7 @@ class DriverTest(APITestCase):
         response = self.client.post(reverse("api:driver-driver-pick-orders"), data={"order_id": order.id})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_driver_picked_order_No_driver_assignTo(self):
+    def test_send_message(self):
         """ An order can be picked up when its status shows ready"""
         order = Order.objects.create(customer=self.test_customer, restaurant=self.test_resto,
                                      address="78 bvd lakeshore", status=Order.READY)

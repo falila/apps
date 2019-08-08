@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from main import serializers
-from main.models import Tag, Driver, Customer
+from main.models import Tag, Driver, Customer, Profile
 from main.serializers import UserSerializer, OrderSerializer
 from order.models import Order
 
@@ -64,7 +64,8 @@ class CustomAuthToken(ObtainAuthToken):
         return Response({
             'token': token.token,
             'user_id': user.pk,
-            'email': user.email
+            'email': user.email,
+            'profile': user.profile.id
         })
 
 
@@ -89,12 +90,11 @@ class TagViewSet(viewsets.GenericViewSet,
 class DriverViewSet(viewsets.GenericViewSet,
                     mixins.ListModelMixin,
                     mixins.CreateModelMixin):
-    """Manage tags in the database"""
     # authentication_classes = (TokenAuthentication,)
     queryset = Driver.objects.all()
     serializer_class = serializers.DriverSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'phone', 'fip', 'user']
+    filterset_fields = ['id']
 
     def get_permissions(self):
 
@@ -106,7 +106,7 @@ class DriverViewSet(viewsets.GenericViewSet,
 
     def get_queryset(self):
         """Return objects for the current authenticated user only"""
-        return self.queryset.order_by('-name')
+        return self.queryset.order_by('-id')
 
     # POST params: access_token, order_id
     @action(detail=False, methods=['post'])
@@ -150,7 +150,7 @@ class DriverViewSet(viewsets.GenericViewSet,
                     Order.objects.filter(driver=driver).order_by("picked_at").last()
                 ).data
             except Exception as e:
-                return JsonResponse({"status": "failed", "error": "No driver found."},
+                return JsonResponse({"status": "failed", "error": e.args},
                                     status=status.HTTP_400_BAD_REQUEST)
 
         return JsonResponse({"order": order})
@@ -170,7 +170,7 @@ class DriverViewSet(viewsets.GenericViewSet,
             order = Order.objects.get(id=request.POST["order_id"], driver=driver)
             order.status = order.DELIVERED
             order.save()
-        except Order.DoesNotExist :
+        except Order.DoesNotExist:
             return JsonResponse({"status": "failed", "error": "No order found."},
                                 status=status.HTTP_400_BAD_REQUEST)
 
@@ -222,7 +222,7 @@ class DriverViewSet(viewsets.GenericViewSet,
             return JsonResponse({"status": "success"})
 
     @action(detail=False, methods=['get'])
-    def driver_get_ready_orders(self, request):
+    def get_ready_orders(self, request):
         order = OrderSerializer(
             Order.objects.filter(status=Order.READY, driver=None).order_by("-id"),
             many=True).data
@@ -233,14 +233,43 @@ class CustomerViewSet(viewsets.GenericViewSet,
                       mixins.ListModelMixin,
                       mixins.CreateModelMixin,
                       mixins.RetrieveModelMixin):
-    """Manage tags in the database"""
+    """Manage  customers."""
     # authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Customer.objects.all()
     serializer_class = serializers.CustomerSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['name', 'phone', 'fip', 'user']
+    filterset_fields = ['id', ]
 
     def get_queryset(self):
         """Return objects for the current authenticated user only"""
-        return self.queryset.order_by('-name')
+        return self.queryset.order_by('-id')
+
+    @action(detail=False, methods=['get'])
+    def latest_order(self, request):
+        customer = self.request.user.customer
+        order = OrderSerializer(Order.objects.filter(customer=customer).last()).data
+
+        return JsonResponse({"order": order})
+
+    @action(detail=True, methods=['get'])
+    def driver_location(self, request):
+        customer = self.request.user.customer
+        # Get drivers location realted to this customer current order
+        current_order = Order.objects.filter(customer=customer, status=Order.ONTHEWAY).last()
+        location = current_order.driver.location
+
+        return JsonResponse({"location": location})
+
+
+class ProfileViewSet(viewsets.GenericViewSet,
+                     mixins.ListModelMixin,
+                     mixins.CreateModelMixin,
+                     mixins.RetrieveModelMixin):
+    """Manage  customers."""
+    # authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+    queryset = Profile.objects.all()
+    serializer_class = serializers.ProfileSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['id', 'name', 'phone', 'fip', 'user', 'type', 'account_ref', 'rank']

@@ -1,11 +1,8 @@
 from django.contrib.auth.models import User
 from rest_framework import status
+from rest_framework.authtoken.models import Token
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
-from rest_framework.authtoken.models import Token
-
-from main.factories import DriverFactory, CustomerFactory
-from oauth2_provider.models import AccessToken
 
 
 class AccountsTest(APITestCase):
@@ -146,6 +143,7 @@ class AccountsTest(APITestCase):
             'username': 'foobar',
             'email': 'foobar@example.com',
             'password': 'somepassword'
+
         }
 
         response = self.client.post(self.create_url, data, format='json')
