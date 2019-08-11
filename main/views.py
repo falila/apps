@@ -252,7 +252,7 @@ class CustomerViewSet(viewsets.GenericViewSet,
 
         return JsonResponse({"order": order})
 
-    @action(detail=True, methods=['get'])
+    @action(detail=False, methods=['get'])
     def driver_location(self, request):
         customer = self.request.user.customer
         # Get drivers location realted to this customer current order

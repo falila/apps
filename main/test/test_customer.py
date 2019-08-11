@@ -38,17 +38,20 @@ class CustomerTest(APITestCase):
         self.test_driver.save()
 
     def test_get_meals(self):
-        response = self.client.get(reverse("api:driver-list"))
+        response = self.client.get(reverse("api:meal-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_create_order(self):
-        response = self.client.get(reverse("api:driver-list"), data={'id': 1})
+        # create meals
+        # create order
+
+        response = self.client.post(reverse("api:order-list"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # test existence in db
 
     def test_get_order_location(self):
-        """The driver cant complete an fake order."""
-        self.test_driver.user = None
-        response = self.client.post(reverse("api:driver-driver-complete-orders"), data={"order_id": 12})
+
+        response = self.client.post(reverse("api:customer-lastest-order"), data={"order_id": 12})
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_last_order(self):
