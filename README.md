@@ -85,8 +85,6 @@ We use [Gitlab](https://gitlab.com/) for versioning. For the versions available,
 
 ## Authors
 
-* **Amadou KEITA** - *Initial work* - [](https://gitlab.com/falila/falisoftsolutions/)
-
 * **Raphael KEITA** - *Initial work* - [](https://gitlab.com/falila/falisoftsolutions/)
 
 
