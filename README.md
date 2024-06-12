@@ -1,7 +1,3 @@
-# Falisoft Solutions Apps
-
-This current project aims to develop some apps like voting app, timer app, tikets booking app, Crm , delivery app, Myappointment app and so on by using Python/Django as Backend Server.
-
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
